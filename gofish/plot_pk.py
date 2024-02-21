@@ -2,13 +2,13 @@
 # with some error bars
 
 import sys
+import matplotlib.pyplot as plt
 import numpy as np
 from configobj import ConfigObj
-from ioutils import CosmoResults, InputData
-from TackleBox import compute_recon
 from scipy.integrate import simps
 from scipy.interpolate import splrep, splev
-import matplotlib.pyplot as plt
+from .ioutils import CosmoResults, InputData
+from .tacklebox import compute_recon
 
 if __name__ == "__main__":
 
@@ -53,7 +53,12 @@ if __name__ == "__main__":
         + dkvec / 2.0
     )
     print(kout, kvec)
-    labels = [r"$\mathrm{BGS\,BRIGHT}$", r"$\mathrm{LRG}$", r"$\mathrm{ELG\_LOP}$", r"$\mathrm{Quasar}$"]
+    labels = [
+        r"$\mathrm{BGS\,BRIGHT}$",
+        r"$\mathrm{LRG}$",
+        r"$\mathrm{ELG\_LOP}$",
+        r"$\mathrm{Quasar}$",
+    ]
     labels2 = [r"$0.0 < z < 0.4$", r"$0.4 < z < 1.1$", r"$1.1 < z < 1.6$", r"$1.6 < z < 2.1$"]
     for iz, (label, label2, ymin, ymax) in enumerate(
         zip(
@@ -63,21 +68,21 @@ if __name__ == "__main__":
             np.array([1900.0, 2800.0, 850.0, 1500.0]),
         )
     ):
-        kaiser = np.tile(data.bias[iz, iz], (len(muvec), 1)).T + cosmo.f[iz] * muvec ** 2
+        kaiser = np.tile(data.bias[iz, iz], (len(muvec), 1)).T + cosmo.f[iz] * muvec**2
 
         # Compute the BAO damping factor parameter after reconstruction at the redshift of interest
         # as a function of k and mu.
-        Dpar = np.outer(muvec ** 2, kvec ** 2) * cosmo.Sigma_par[iz] ** 2
-        Dperp = np.outer(1.0 - muvec ** 2, kvec ** 2) * cosmo.Sigma_perp[iz] ** 2
+        Dpar = np.outer(muvec**2, kvec**2) * cosmo.Sigma_par[iz] ** 2
+        Dperp = np.outer(1.0 - muvec**2, kvec**2) * cosmo.Sigma_perp[iz] ** 2
         Dfactor = np.exp(-(recon[iz] ** 2) * (Dpar + Dperp) / 2.0)
 
         # Compute the model 2D power spectrum
-        pkmod = (kaiser.T ** 2 * splev(kvec, cosmo.pk[iz]) * Dfactor).T
-        pkmodsmooth = (kaiser.T ** 2 * splev(kvec, cosmo.pksmooth[iz]) * Dfactor).T
+        pkmod = (kaiser.T**2 * splev(kvec, cosmo.pk[iz]) * Dfactor).T
+        pkmodsmooth = (kaiser.T**2 * splev(kvec, cosmo.pksmooth[iz]) * Dfactor).T
 
         # Integrate the 2D model over mu to get the multipoles
-        L2 = 1.0 / 2.0 * (3.0 * muvec ** 2 - 1.0)
-        L4 = 1.0 / 8.0 * (35.0 * muvec ** 4 - 30.0 * muvec ** 2 + 3.0)
+        L2 = 1.0 / 2.0 * (3.0 * muvec**2 - 1.0)
+        L4 = 1.0 / 8.0 * (35.0 * muvec**4 - 30.0 * muvec**2 + 3.0)
         pk0 = simps(pkmod, muvec, axis=-1)
         pk2 = 5.0 * simps(pkmod * L2, muvec, axis=-1)
         pk4 = 9.0 * simps(pkmod * L4, muvec, axis=-1)
@@ -88,50 +93,62 @@ if __name__ == "__main__":
         pk2cov = (
             2.0
             * 25.0
-            * simps((pkmod + 1.0 / data.nbar[iz, iz]) ** 2 * L2 ** 2, muvec, axis=-1)
+            * simps((pkmod + 1.0 / data.nbar[iz, iz]) ** 2 * L2**2, muvec, axis=-1)
             / cosmo.volume[iz]
         )
         pk4cov = (
             2.0
             * 81.0
-            * simps((pkmod + 1.0 / data.nbar[iz, iz]) ** 2 * L4 ** 2, muvec, axis=-1)
+            * simps((pkmod + 1.0 / data.nbar[iz, iz]) ** 2 * L4**2, muvec, axis=-1)
             / cosmo.volume[iz]
         )
 
         Vkout = 4.0 / 3.0 * np.pi * ((kout + dkout / 2.0) ** 3 - (kout - dkout / 2.0) ** 3)
         Vkvec = 4.0 / 3.0 * np.pi * ((kvec + dkvec / 2.0) ** 3 - (kvec - dkvec / 2.0) ** 3)
-        pk0new = 4.0 * np.pi * np.sum((pk0 * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
-        pk2new = 4.0 * np.pi * np.sum((pk2 * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
-        pk4new = 4.0 * np.pi * np.sum((pk4 * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+        pk0new = 4.0 * np.pi * np.sum((pk0 * kvec**2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+        pk2new = 4.0 * np.pi * np.sum((pk2 * kvec**2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+        pk4new = 4.0 * np.pi * np.sum((pk4 * kvec**2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
         pk0smoothnew = (
-            4.0 * np.pi * np.sum((pk0smooth * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+            4.0
+            * np.pi
+            * np.sum((pk0smooth * kvec**2).reshape((-1, ncomb)), axis=-1)
+            * dkvec
+            / Vkout
         )
         pk2smoothnew = (
-            4.0 * np.pi * np.sum((pk2smooth * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+            4.0
+            * np.pi
+            * np.sum((pk2smooth * kvec**2).reshape((-1, ncomb)), axis=-1)
+            * dkvec
+            / Vkout
         )
         pk4smoothnew = (
-            4.0 * np.pi * np.sum((pk4smooth * kvec ** 2).reshape((-1, ncomb)), axis=-1) * dkvec / Vkout
+            4.0
+            * np.pi
+            * np.sum((pk4smooth * kvec**2).reshape((-1, ncomb)), axis=-1)
+            * dkvec
+            / Vkout
         )
         pk0covnew = (
             2.0
             * (2.0 * np.pi) ** 4
-            * np.sum((pk0cov * kvec ** 2).reshape((-1, ncomb)), axis=-1)
+            * np.sum((pk0cov * kvec**2).reshape((-1, ncomb)), axis=-1)
             * dkvec
-            / Vkout ** 2
+            / Vkout**2
         )
         pk2covnew = (
             2.0
             * (2.0 * np.pi) ** 4
-            * np.sum((pk2cov * kvec ** 2).reshape((-1, ncomb)), axis=-1)
+            * np.sum((pk2cov * kvec**2).reshape((-1, ncomb)), axis=-1)
             * dkvec
-            / Vkout ** 2
+            / Vkout**2
         )
         pk4covnew = (
             2.0
             * (2.0 * np.pi) ** 4
-            * np.sum((pk4cov * kvec ** 2).reshape((-1, ncomb)), axis=-1)
+            * np.sum((pk4cov * kvec**2).reshape((-1, ncomb)), axis=-1)
             * dkvec
-            / Vkout ** 2
+            / Vkout**2
         )
 
         fig = plt.figure()

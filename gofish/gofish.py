@@ -1,13 +1,12 @@
 import sys
 import numpy as np
-import importlib
 from configobj import ConfigObj
-from TackleBox import Set_Bait, Fish, CovRenorm
-from ioutils import CosmoResults, InputData, write_fisher
 from scipy.linalg.lapack import dgesv
+from .tacklebox import Set_Bait, Fish, CovRenorm
+from .ioutils import CosmoResults, InputData, write_fisher
 
-if __name__ == "__main__":
 
+def main():
     # Read in the config file
     configfile = sys.argv[1]
     pardict = ConfigObj(configfile)
@@ -32,7 +31,9 @@ if __name__ == "__main__":
     print(data.bias)
 
     # Precompute some things we might need for the Fisher matrix
-    recon, derPalpha, derPalpha_BAO_only = Set_Bait(cosmo, data, BAO_only=pardict.as_bool("BAO_only"))
+    recon, derPalpha, derPalpha_BAO_only = Set_Bait(
+        cosmo, data, BAO_only=pardict.as_bool("BAO_only")
+    )
     print("#  Data recon factor")
     print(recon)
 
@@ -79,8 +80,13 @@ if __name__ == "__main__":
                 iz * len(data.nbar) : (iz + 1) * len(data.nbar),
                 iz * len(data.nbar) : (iz + 1) * len(data.nbar),
             ] += Catch[: len(data.nbar), : len(data.nbar)]
-            FullCatch[iz * len(data.nbar) : (iz + 1) * len(data.nbar), -3:,] += Catch[: len(data.nbar), -3:]
-            FullCatch[-3:, iz * len(data.nbar) : (iz + 1) * len(data.nbar)] += Catch[-3:, : len(data.nbar)]
+            FullCatch[
+                iz * len(data.nbar) : (iz + 1) * len(data.nbar),
+                -3:,
+            ] += Catch[: len(data.nbar), -3:]
+            FullCatch[-3:, iz * len(data.nbar) : (iz + 1) * len(data.nbar)] += Catch[
+                -3:, : len(data.nbar)
+            ]
             FullCatch[-3:, -3:] += Catch[-3:, -3:]
 
             # Invert the Fisher matrix to get the parameter covariance matrix
@@ -156,3 +162,7 @@ if __name__ == "__main__":
             erralpha,
         )
     )
+
+
+if __name__ == "__main__":
+    main()

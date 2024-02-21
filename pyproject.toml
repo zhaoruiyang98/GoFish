@@ -1,0 +1,49 @@
+[project]
+name = "GoFish"
+description = "Fisher forecast tool for DESI galaxy clustering"
+readme = "README.md"
+keywords = ["cosmology", "large-scale structures"]
+authors = [
+    { name = "Cullan Howlett", email = "chowlett@uq.edu.au" },
+    { name = "Lado Samushia", email = "lado.samushia.office@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dynamic = ["version"]
+
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "camb",
+    "configobj",
+    "pandas",
+    "findiff",
+    "quadpy==0.16.10",
+    "matplotlib",
+]
+
+[project.scripts]
+gofish = "gofish.gofish:main"
+
+[tool.setuptools]
+packages = ["gofish"]
+
+[tool.setuptools.dynamic]
+version = { attr = "gofish.__version__" }
+
+[tool.black]
+line-length = 100
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"

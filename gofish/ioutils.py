@@ -17,7 +17,7 @@ class InputData:
         self.remove_null_tracers()
 
     def read_nbar(self, pardict):
-        """ Reads redshift edges, number density, and bias from an input file
+        """Reads redshift edges, number density, and bias from an input file
 
         Parameters
         ----------
@@ -38,7 +38,7 @@ class InputData:
         return df
 
     def convert_nbar(self, volume, skyarea):
-        """ Converts the number of galaxies per sq. deg. per dz into number density in (h/Mpc)^3
+        """Converts the number of galaxies per sq. deg. per dz into number density in (h/Mpc)^3
 
         Parameters
         ----------
@@ -61,8 +61,7 @@ class InputData:
         self.bias /= growth
 
     def remove_null_tracers(self):
-
-        """ Sorts out any tracers that have zero number density in a particular redshift bin.
+        """Sorts out any tracers that have zero number density in a particular redshift bin.
             Does this my setting the bias to 0.0 in that bin and the number density to a very small number.
             This ensures their is no information in that bin from that tracer.
 
@@ -103,8 +102,7 @@ class CosmoResults:
         self.kmax = float(pardict["kmax"])
 
     def run_camb(self, pardict, zlow, zhigh):
-
-        """ Runs an instance of CAMB given the cosmological parameters in pardict and redshift bins
+        """Runs an instance of CAMB given the cosmological parameters in pardict and redshift bins
 
         Parameters
         ----------
@@ -194,7 +192,7 @@ class CosmoResults:
         area = float(pardict["skyarea"]) * (np.pi / 180.0) ** 2
         rmin = results.comoving_radial_distance(zlow) * pars.H0 / 100.0
         rmax = results.comoving_radial_distance(zhigh) * pars.H0 / 100.0
-        volume = area / 3.0 * (rmax ** 3 - rmin ** 3)
+        volume = area / 3.0 * (rmax**3 - rmin**3)
         da = results.angular_diameter_distance(zmid)
         hubble = results.hubble_parameter(zmid)
         fsigma8 = results.get_fsigma8()[::-1][1:]
@@ -211,7 +209,7 @@ class CosmoResults:
         return zmid, volume, kin, pk_splines, pksmooth_splines, da, hubble, f, sigma8, growth, r_d
 
     def get_Sigmas(self, f, sigma8):
-        """ Compute the nonlinear degradation of the BAO feature in the perpendicular and parallel direction
+        """Compute the nonlinear degradation of the BAO feature in the perpendicular and parallel direction
 
         Parameters
         ----------
@@ -235,7 +233,7 @@ class CosmoResults:
         return Sigma_perp, Sigma_par
 
     def smooth_hinton2017(self, ks, pk, degree=13, sigma=1, weight=0.5):
-        """ Smooth power spectrum based on Hinton et. al., 2017 polynomial method
+        """Smooth power spectrum based on Hinton et. al., 2017 polynomial method
 
         Parameters
         ----------
@@ -270,7 +268,7 @@ class CosmoResults:
 
 
 def write_fisher(pardict, cov_inv, redshift, parameter_means):
-    """ Write Fisher predictions to text files
+    """Write Fisher predictions to text files
 
     Parameters
     ---------
